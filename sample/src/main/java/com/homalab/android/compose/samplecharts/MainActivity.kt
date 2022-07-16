@@ -11,6 +11,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.homalab.android.compose.samplecharts.charts.SampleBarChart
 import com.homalab.android.compose.samplecharts.charts.LinesChart
 import com.homalab.android.compose.samplecharts.ui.theme.SampleChartsTheme
 
@@ -54,7 +55,11 @@ fun SampleApp(mainState: MainState = rememberMainState()) {
                 )
             }
             ChartDisplay.BAR -> {
-
+                SampleBarChart(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = paddingValues.calculateTopPadding() + 16.dp)
+                )
             }
         }
     }
