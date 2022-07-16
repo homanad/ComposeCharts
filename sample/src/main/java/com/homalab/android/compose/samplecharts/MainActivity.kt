@@ -4,10 +4,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.homalab.android.compose.samplecharts.charts.LinesChart
 import com.homalab.android.compose.samplecharts.ui.theme.SampleChartsTheme
 
 class MainActivity : ComponentActivity() {
@@ -43,7 +47,11 @@ fun SampleApp(mainState: MainState = rememberMainState()) {
     ) { paddingValues ->
         when (mainState.chartDisplay) {
             ChartDisplay.MULTIPLE_LINES -> {
-
+                LinesChart(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = paddingValues.calculateTopPadding() + 16.dp)
+                )
             }
             ChartDisplay.BAR -> {
 
