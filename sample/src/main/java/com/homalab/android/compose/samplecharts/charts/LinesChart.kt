@@ -3,6 +3,7 @@ package com.homalab.android.compose.samplecharts.charts
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.homalab.android.compose.charts.ChartDefaults
 import com.homalab.android.compose.charts.MultipleChartData
 import com.homalab.android.compose.charts.MultipleChartValue
 import com.homalab.android.compose.charts.MultipleLinesChart
@@ -10,12 +11,13 @@ import kotlin.math.ceil
 import kotlin.math.floor
 
 @Composable
-fun LinesChart(modifier: Modifier = Modifier) {
+fun SampleLinesChart(modifier: Modifier = Modifier) {
     MultipleLinesChart(
         modifier = modifier,
         chartData = getTestData(),
         verticalAxisValues = generateMinMaxRange(6f, 30f),
-        verticalAxisLabelTransform = { it.toString() }
+        verticalAxisLabelTransform = { it.toString() },
+        animationOptions = ChartDefaults.defaultAnimationOptions().copy(true, 600)
     )
 }
 

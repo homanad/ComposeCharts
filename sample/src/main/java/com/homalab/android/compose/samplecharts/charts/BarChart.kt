@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.homalab.android.compose.charts.BarChart
 import com.homalab.android.compose.charts.BarChartData
+import com.homalab.android.compose.charts.ChartDefaults
 
 @Composable
 fun SampleBarChart(modifier: Modifier = Modifier) {
@@ -12,7 +13,8 @@ fun SampleBarChart(modifier: Modifier = Modifier) {
         modifier = modifier,
         chartData = getChartData(),
         verticalAxisValues = generateMinMaxRange(0f, 25f),
-        verticalAxisLabelTransform = { it.toString() }
+        verticalAxisLabelTransform = { it.toString() },
+        animationOptions = ChartDefaults.defaultAnimationOptions().copy(true)
     )
 }
 
