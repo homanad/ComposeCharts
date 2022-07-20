@@ -1,4 +1,4 @@
-package com.homalab.android.compose.weather.presentation.components.charts.components
+package com.homalab.android.compose.charts.components
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
@@ -10,7 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import com.homalab.android.compose.weather.presentation.components.charts.entities.BarEntity
+import com.homalab.android.compose.charts.entities.BarEntity
 import kotlinx.coroutines.delay
 
 @Composable
@@ -31,7 +31,7 @@ fun AnimatedBar(
             animationSpec = tween(durationMillis, easing = LinearEasing)
         )
     })
-    val rect = barEntity.rectF
+    val rect = barEntity.rect
     Canvas(modifier = modifier, onDraw = {
         val y = rect.bottom - (rect.bottom - rect.top) * animatable.value
         drawRect(

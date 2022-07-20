@@ -5,7 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.homalab.android.compose.charts.BarChart
 import com.homalab.android.compose.charts.BarChartData
-import com.homalab.android.compose.charts.ChartDefaults
+import com.homalab.android.compose.charts.components.ChartDefaults
 
 @Composable
 fun SampleBarChart(modifier: Modifier = Modifier) {

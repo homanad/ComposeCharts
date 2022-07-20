@@ -1,4 +1,4 @@
-package com.homalab.android.compose.weather.presentation.components.charts.entities
+package com.homalab.android.compose.charts.entities
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color

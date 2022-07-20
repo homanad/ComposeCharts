@@ -1,7 +1,6 @@
 package com.homalab.android.compose.charts
 
 import android.graphics.Paint
-import android.graphics.RectF
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.*
@@ -14,41 +13,36 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
-import com.homalab.android.compose.charts.components.toDp
-import com.homalab.android.compose.charts.components.toPx
-import com.homalab.android.compose.weather.presentation.components.charts.components.AnimatedBar
-import com.homalab.android.compose.weather.presentation.components.charts.entities.BarEntity
+import com.homalab.android.compose.charts.components.*
+import com.homalab.android.compose.charts.entities.BarEntity
 
 @Composable
 fun BarChart(
     modifier: Modifier = Modifier,
     chartData: List<BarChartData>,
-    verticalAxisValues: List<Float>,
+    verticalAxisValues: MutableList<Float> = mutableListOf(),
     verticalAxisLabelTransform: (Float) -> String,
-    horizontalAxisLabelColor: Color = DefaultAxisLabelColor,
-    horizontalAxisLabelFontSize: TextUnit = DefaultAxisLabelFontSize,
-    showHorizontalLines: Boolean = true,
-    horizontalLineSpacing: Dp = HorizontalLineSpacing,
-    horizontalLineStyle: HorizontalLineStyle = HorizontalLineStyle.DASH,
-    verticalAxisLabelColor: Color = DefaultAxisLabelColor,
-    verticalAxisLabelFontSize: TextUnit = DefaultAxisLabelFontSize,
-    axisColor: Color = Color.Gray,
+    horizontalAxisOptions: ChartDefaults.AxisOptions = ChartDefaults.defaultAxisOptions(),
+    verticalAxisOptions: ChartDefaults.AxisOptions = ChartDefaults.defaultAxisOptions(),
+    horizontalLineOptions: ChartDefaults.HorizontalLineOptions = ChartDefaults.defaultHorizontalLineOptions(),
+    animationOptions: ChartDefaults.AnimationOptions = ChartDefaults.defaultAnimationOptions(),
     barWidthRatio: Float = DefaultBarWidthRatio,
-    axisThickness: Dp = DefaultAxisThickness,
-    contentPadding: Dp = DefaultContentPadding,
-    animationOptions: ChartDefaults.AnimationOptions = ChartDefaults.defaultAnimationOptions()
+    contentPadding: Dp = DefaultContentPadding
 ) {
-    val axisThicknessPx = axisThickness.toPx()
+    if (verticalAxisValues.isEmpty()) verticalAxisValues.addAll(generateVerticaAxisValues(chartData))
+
+    val horizontalAxisThicknessPx = horizontalAxisOptions.axisThickness.toPx()
+    val verticalAxisThicknessPx = verticalAxisOptions.axisThickness.toPx()
     val contentPaddingPx = contentPadding.toPx()
 
-    val visibleChartHeight = horizontalLineSpacing * (verticalAxisValues.size - 1)
-    val horizontalAxisLabelHeight = contentPadding + horizontalAxisLabelFontSize.toDp()
+    val visibleChartHeight =
+        horizontalLineOptions.horizontalLineSpacing * (verticalAxisValues.size - 1)
+    val horizontalAxisLabelHeight = contentPadding + horizontalAxisOptions.axisLabelFontSize.toDp()
 
     val chartHeight = visibleChartHeight + horizontalAxisLabelHeight
 
     val leftAreaWidth =
-        (verticalAxisLabelTransform(verticalAxisValues.last()).length * verticalAxisLabelFontSize.toPx()
+        (verticalAxisLabelTransform(verticalAxisValues.last()).length * verticalAxisOptions.axisLabelFontSize.toPx()
             .div(1.75)).toInt() + contentPaddingPx
 
     var animatedBars by remember {
@@ -63,29 +57,29 @@ fun BarChart(
 
         //draw horizontal axis
         drawRect(
-            color = axisColor,
+            color = horizontalAxisOptions.axisColor,
             topLeft = Offset(leftAreaWidth, verticalAxisLength),
-            size = Size(horizontalAxisLength, axisThicknessPx)
+            size = Size(horizontalAxisLength, horizontalAxisThicknessPx)
         )
 
         //draw vertical axis
         drawRect(
-            color = axisColor,
+            color = verticalAxisOptions.axisColor,
             topLeft = Offset(leftAreaWidth, 0.0f),
-            size = Size(axisThicknessPx, verticalAxisLength)
+            size = Size(verticalAxisThicknessPx, verticalAxisLength)
         )
 
         //draw horizontal lines & labels
         val verticalValuesTextPaint = Paint().apply {
-            textSize = verticalAxisLabelFontSize.toPx()
-            color = verticalAxisLabelColor.toArgb()
+            textSize = verticalAxisOptions.axisLabelFontSize.toPx()
+            color = verticalAxisOptions.axisLabelColor.toArgb()
             textAlign = Paint.Align.CENTER
             isAntiAlias = true
         }
 
         val horizontalValuesTextPaint = Paint().apply {
-            textSize = horizontalAxisLabelFontSize.toPx()
-            color = horizontalAxisLabelColor.toArgb()
+            textSize = horizontalAxisOptions.axisLabelFontSize.toPx()
+            color = horizontalAxisOptions.axisLabelColor.toArgb()
             textAlign = Paint.Align.CENTER
             isAntiAlias = true
         }
@@ -97,24 +91,24 @@ fun BarChart(
                 drawText(
                     verticalAxisLabelTransform(fl),
                     x,
-                    y + verticalAxisLabelFontSize.toPx() / 2,
+                    y + verticalAxisOptions.axisLabelFontSize.toPx() / 2,
                     verticalValuesTextPaint
                 )
             }
 
-            if (showHorizontalLines && index != 0)
+            if (horizontalLineOptions.showHorizontalLines && index != 0)
                 drawLine(
                     start = Offset(leftAreaWidth, y),
                     end = Offset(leftAreaWidth + horizontalAxisLength, y),
-                    color = axisColor,
-                    strokeWidth = axisThicknessPx,
-                    pathEffect = if (horizontalLineStyle == HorizontalLineStyle.DASH) PathEffect.dashPathEffect(
+                    color = horizontalLineOptions.horizontalLineColor,
+                    strokeWidth = horizontalLineOptions.horizontalLineThickness.toPx(),
+                    pathEffect = if (horizontalLineOptions.horizontalLineStyle == HorizontalLineStyle.DASH) PathEffect.dashPathEffect(
                         floatArrayOf(10f, 10f), 5f
                     ) else null
                 )
         }
 
-        val barWidth = (drawContext.size.width - leftAreaWidth) / chartData.size
+        val barWidth = horizontalAxisLength / chartData.size
         val minValue = verticalAxisValues.minOf { it }
         val deltaRange = verticalAxisValues.maxOf { it } - minValue
 
@@ -139,12 +133,14 @@ fun BarChart(
                 verticalAxisLength = verticalAxisLength
             )
 
-            if (animationOptions.isEnabled) rectFs.add(
-                BarEntity(
-                    barChartData.barColor,
-                    RectF(rect.left, rect.top, rect.right, rect.bottom)
+            if (animationOptions.isEnabled) {
+                rectFs.add(
+                    BarEntity(
+                        barChartData.barColor,
+                        Rect(rect.left, rect.top, rect.right, rect.bottom)
+                    )
                 )
-            ) else drawRect(
+            } else drawRect(
                 color = barChartData.barColor,
                 topLeft = rect.topLeft,
                 size = rect.bottomRight.toSize(rect.topLeft)
@@ -163,7 +159,7 @@ fun BarChart(
         animatedBars = rectFs
     }
 
-    animatedBars.filter { it.rectF.bottom - it.rectF.top > 0 }.forEachIndexed { index, bar ->
+    animatedBars.filter { it.rect.size.height > 0 }.forEachIndexed { index, bar ->
         AnimatedBar(
             modifier = modifier.height(chartHeight),
             durationMillis = animationOptions.durationMillis,
@@ -172,6 +168,14 @@ fun BarChart(
         )
     }
 }
+
+private fun generateVerticaAxisValues(chartData: List<BarChartData>): List<Float> {
+    val values = mutableListOf<Float>().apply {
+        addAll(chartData.map { it.barValue })
+    }
+    return generateVerticalValues(values.minOf { it }, values.maxOf { it })
+}
+
 
 private fun Offset.toSize(topLeftOffset: Offset): Size {
     return Size(x - topLeftOffset.x, y - topLeftOffset.y)

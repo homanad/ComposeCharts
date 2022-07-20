@@ -1,4 +1,4 @@
-package com.homalab.android.compose.weather.presentation.components.charts.components
+package com.homalab.android.compose.charts.components
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
@@ -9,7 +9,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import com.homalab.android.compose.weather.presentation.components.charts.entities.LineEntity
+import com.homalab.android.compose.charts.entities.LineEntity
 import kotlinx.coroutines.delay
 
 @Composable
