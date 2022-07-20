@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.homalab.android.compose.samplecharts.charts.SampleBarChart
 import com.homalab.android.compose.samplecharts.charts.SampleLinesChart
+import com.homalab.android.compose.samplecharts.charts.SamplePieChart
 import com.homalab.android.compose.samplecharts.ui.theme.SampleChartsTheme
 
 class MainActivity : ComponentActivity() {
@@ -56,6 +57,13 @@ fun SampleApp(mainState: MainState = rememberMainState()) {
             }
             ChartDisplay.BAR -> {
                 SampleBarChart(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = paddingValues.calculateTopPadding() + 16.dp)
+                )
+            }
+            ChartDisplay.PIE -> {
+                SamplePieChart(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = paddingValues.calculateTopPadding() + 16.dp)

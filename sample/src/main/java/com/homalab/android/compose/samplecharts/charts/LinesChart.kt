@@ -3,47 +3,27 @@ package com.homalab.android.compose.samplecharts.charts
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.homalab.android.compose.charts.LinesChart
 import com.homalab.android.compose.charts.MultipleChartData
 import com.homalab.android.compose.charts.MultipleChartValue
-import com.homalab.android.compose.charts.LinesChart
 import com.homalab.android.compose.charts.components.ChartDefaults
-import kotlin.math.ceil
-import kotlin.math.floor
+import com.homalab.android.compose.charts.components.generateVerticalValues
 
 @Composable
 fun SampleLinesChart(modifier: Modifier = Modifier) {
     LinesChart(
         modifier = modifier,
         chartData = getTestData(),
-        verticalAxisValues = generateMinMaxRange(6f, 30f),
+        verticalAxisValues = generateVerticalValues(6f, 30f).toMutableList(),
         verticalAxisLabelTransform = { it.toString() },
         animationOptions = ChartDefaults.defaultAnimationOptions().copy(true, 600)
     )
 }
 
-fun generateMinMaxRange(min: Float, max: Float): List<Float> {
-    val minValue = floor(min).toInt()
-    val maxValue = ceil(max).toInt()
-
-    val delta = maxValue - minValue
-    val step = ceil(delta.toFloat() / MAX_HORIZONTAL_LINE).toInt()
-
-    val list = mutableListOf<Float>()
-    var value = minValue - step
-    while (value < maxValue) {
-        value += step
-        list.add(value.toFloat())
-    }
-    return list
-}
-
-const val MAX_HORIZONTAL_LINE = 5
-
 fun getTestData(): List<MultipleChartData> {
     return listOf(
         MultipleChartData(
             dotColor = Color.Green,
-            dotRatio = 1.5f,
             label = "line 1",
             lineColor = Color.Green,
             values = listOf(
@@ -56,7 +36,6 @@ fun getTestData(): List<MultipleChartData> {
         ),
         MultipleChartData(
             dotColor = Color.Gray,
-            dotRatio = 1.5f,
             label = "line 2",
             lineColor = Color.Gray,
             values = listOf(
@@ -69,7 +48,6 @@ fun getTestData(): List<MultipleChartData> {
         ),
         MultipleChartData(
             dotColor = Color.Blue,
-            dotRatio = 1.5f,
             label = "line 3",
             lineColor = Color.Blue,
             values = listOf(
