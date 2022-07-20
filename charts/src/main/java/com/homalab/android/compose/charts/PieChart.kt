@@ -14,17 +14,21 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawStyle
+import com.homalab.android.compose.charts.components.ChartDefaults
 import kotlinx.coroutines.delay
 
 @Composable
 fun PieChart(
     modifier: Modifier = Modifier,
     chartData: List<PieChartData>,
+    pieAnimationOptions: ChartDefaults.PieAnimationOptions = ChartDefaults.defaultPieAnimationOptions(),
     drawStyle: DrawStyle
 ) {
 
-    val angleAnimatable = remember {
+    val angleAnimatable = if (pieAnimationOptions.isEnabled) remember {
         Animatable(0f)
+    } else remember {
+        Animatable(360f)
     }
 
     val shiftAnimatable = remember {
@@ -32,25 +36,31 @@ fun PieChart(
     }
 
     LaunchedEffect(angleAnimatable, block = {
-        delay(100)
+        if (!pieAnimationOptions.isEnabled) return@LaunchedEffect
+
+        delay(pieAnimationOptions.drawDelayMillis.toLong())
+
         angleAnimatable.animateTo(
             targetValue = 360f,
             animationSpec = tween(
-                durationMillis = 1000,
-                delayMillis = 300,
+                durationMillis = pieAnimationOptions.angleDurationMillis,
+                delayMillis = pieAnimationOptions.angleDelayMillis,
                 easing = LinearOutSlowInEasing
             )
         )
     })
 
     LaunchedEffect(key1 = shiftAnimatable, block = {
-        delay(100)
+        if (!pieAnimationOptions.isEnabled) return@LaunchedEffect
+
+        delay(pieAnimationOptions.drawDelayMillis.toLong())
+
         shiftAnimatable.animateTo(
-            targetValue = 30f,
+            targetValue = pieAnimationOptions.shiftAngle,
             animationSpec = tween(
-                durationMillis = 1000,
-                delayMillis = 300,
-                easing = CubicBezierEasing(0f, 0f, 0f, 0f)
+                durationMillis = pieAnimationOptions.shiftDurationMillis,
+                delayMillis = pieAnimationOptions.shiftDelayMillis,
+                easing = CubicBezierEasing(0f, 0.75f, 0.35f, 0.85f)
             )
         )
     })

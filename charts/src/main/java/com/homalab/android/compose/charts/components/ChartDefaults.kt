@@ -114,4 +114,48 @@ object ChartDefaults {
             showCirclePoint: Boolean = this.showCirclePoint
         ) = CirclePointOptions(baseRatio, upscaleBackCircle, upscaleRatioStep, showCirclePoint)
     }
+
+    fun defaultPieAnimationOptions() = PieAnimationOptions(
+        isEnabled = true,
+        angleDurationMillis = 1000,
+        angleDelayMillis = 300,
+        isShiftEnabled = true,
+        shiftAngle = 90f,
+        shiftDurationMillis = 1000,
+        shiftDelayMillis = 300,
+        drawDelayMillis = 100
+    )
+
+    @Immutable
+    class PieAnimationOptions(
+        val isEnabled: Boolean,
+        val angleDurationMillis: Int,
+        val angleDelayMillis: Int,
+        val isShiftEnabled: Boolean,
+        val shiftAngle: Float,
+        val shiftDurationMillis: Int,
+        val shiftDelayMillis: Int,
+        val drawDelayMillis: Int
+    ) {
+        @Stable
+        fun copy(
+            isEnabled: Boolean = this.isEnabled,
+            angleDurationMillis: Int = this.angleDurationMillis,
+            angleDelayMillis: Int = this.angleDelayMillis,
+            isShiftEnabled: Boolean = this.isShiftEnabled,
+            shiftAngle: Float = this.shiftAngle,
+            shiftDurationMillis: Int = this.shiftDurationMillis,
+            shiftDelayMillis: Int = this.shiftDelayMillis,
+            drawDelayMillis: Int = this.drawDelayMillis
+        ) = PieAnimationOptions(
+            isEnabled,
+            angleDurationMillis,
+            angleDelayMillis,
+            isShiftEnabled,
+            shiftAngle,
+            shiftDurationMillis,
+            shiftDelayMillis,
+            drawDelayMillis
+        )
+    }
 }
