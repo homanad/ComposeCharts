@@ -158,4 +158,19 @@ object ChartDefaults {
             drawDelayMillis
         )
     }
+
+    fun defaultPercentTextOptions() = PercentTextOptions(
+        fontSize = DefaultAxisLabelFontSize,
+        textColor = DefaultAxisLabelColor
+    )
+
+    @Immutable
+    class PercentTextOptions(
+        val fontSize: TextUnit,
+        val textColor: Color
+    ) {
+        @Stable
+        fun copy(fontSize: TextUnit = this.fontSize, textColor: Color = this.textColor) =
+            PercentTextOptions(fontSize, textColor)
+    }
 }

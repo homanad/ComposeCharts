@@ -1,5 +1,6 @@
 package com.homalab.android.compose.charts
 
+import android.text.TextPaint
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -12,17 +13,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawStyle
+import androidx.compose.ui.graphics.drawscope.Fill
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import com.homalab.android.compose.charts.components.ChartDefaults
 import kotlinx.coroutines.delay
+import kotlin.math.cos
+import kotlin.math.sin
 
 @Composable
 fun PieChart(
     modifier: Modifier = Modifier,
     chartData: List<PieChartData>,
     pieAnimationOptions: ChartDefaults.PieAnimationOptions = ChartDefaults.defaultPieAnimationOptions(),
-    drawStyle: DrawStyle
+    drawStyle: DrawStyle = Fill,
+    percentTextOptions: ChartDefaults.PercentTextOptions = ChartDefaults.defaultPercentTextOptions()
 ) {
 
     val angleAnimatable = if (pieAnimationOptions.isEnabled) remember {
@@ -32,6 +40,10 @@ fun PieChart(
     }
 
     val shiftAnimatable = remember {
+        Animatable(0f)
+    }
+
+    val textAnimatable = remember {
         Animatable(0f)
     }
 
@@ -65,6 +77,21 @@ fun PieChart(
         )
     })
 
+    LaunchedEffect(textAnimatable, block = {
+        if (!pieAnimationOptions.isEnabled) return@LaunchedEffect
+
+        delay(pieAnimationOptions.drawDelayMillis.toLong())
+
+        textAnimatable.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(
+                durationMillis = pieAnimationOptions.angleDurationMillis,
+                delayMillis = pieAnimationOptions.angleDelayMillis,
+                easing = LinearOutSlowInEasing
+            )
+        )
+    })
+
     val total = chartData.sumOf { it.value.toDouble() }
     val proportions = chartData.map {
         it.value / total
@@ -81,6 +108,15 @@ fun PieChart(
         val size = Size(innerRadius * 2, innerRadius * 2)
         var startAngle = shiftAnimatable.value - 90f
 
+        val paint = TextPaint().apply {
+            isAntiAlias = true
+            color = percentTextOptions.textColor.toArgb()
+            textSize = textAnimatable.value * percentTextOptions.fontSize.toPx()
+        }
+
+        val radius = size.minDimension / 4f
+
+        val centerPoint = Offset(topLeft.x + size.center.x, topLeft.y + size.center.y)
         proportions.forEachIndexed { index, d ->
             val sweep = (d * angleAnimatable.value).toFloat()
             drawArc(
@@ -92,6 +128,18 @@ fun PieChart(
                 useCenter = true,
                 style = drawStyle
             )
+            drawContext.canvas.nativeCanvas.run {
+                val degree = 360 + startAngle + sweep / 2
+
+                val centerArcX = cos(Math.toRadians(degree.toDouble())) * radius + centerPoint.x
+                val centerArcY = sin(Math.toRadians(degree.toDouble())) * radius + centerPoint.y
+
+                val text = String.format("%.2f", d * 100) + "%"
+                val textWidth =
+                    (text.length * percentTextOptions.fontSize.toPx()).div(1.75).toFloat()
+
+                drawText(text, centerArcX.toFloat() - textWidth / 2, centerArcY.toFloat(), paint)
+            }
             startAngle += sweep
         }
     }
