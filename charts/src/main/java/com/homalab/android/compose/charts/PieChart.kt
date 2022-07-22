@@ -1,5 +1,6 @@
 package com.homalab.android.compose.charts
 
+import android.graphics.Paint
 import android.text.TextPaint
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing
@@ -21,7 +22,6 @@ import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
 import com.homalab.android.compose.charts.components.*
 import kotlinx.coroutines.delay
 import kotlin.math.ceil
@@ -34,11 +34,11 @@ fun PieChart(
     chartData: List<PieChartData>,
     pieAnimationOptions: ChartDefaults.PieAnimationOptions = ChartDefaults.defaultPieAnimationOptions(),
     drawStyle: DrawStyle = Fill,
-    percentTextOptions: ChartDefaults.PercentTextOptions = ChartDefaults.defaultPercentTextOptions(),
-    labelTextFontSize: TextUnit = DefaultAxisLabelFontSize,
+    percentTextOptions: ChartDefaults.TextOptions = ChartDefaults.defaultTextOptions(),
+    labelTextOptions: ChartDefaults.TextOptions = ChartDefaults.defaultTextOptions(),
     contentPadding: Dp = DefaultContentPadding
 ) {
-    val labelLineHeight = contentPadding * 2 + labelTextFontSize.toDp()
+    val labelLineHeight = contentPadding * 2 + labelTextOptions.fontSize.toDp()
     val totalChartLabelHeight =
         labelLineHeight * ceil(chartData.size.toFloat() / MaxChartLabelInOneLine)
 
@@ -116,10 +116,17 @@ fun PieChart(
         val size = Size(innerRadius * 2, innerRadius * 2)
         var startAngle = shiftAnimatable.value - 90f
 
-        val paint = TextPaint().apply {
+        val percentTextPaint = TextPaint().apply {
             isAntiAlias = true
             color = percentTextOptions.textColor.toArgb()
             textSize = textAnimatable.value * percentTextOptions.fontSize.toPx()
+        }
+
+        val labelFontSizePx = labelTextOptions.fontSize.toPx()
+        val labelTextPaint = TextPaint().apply {
+            isAntiAlias = true
+            color = labelTextOptions.textColor.toArgb()
+            textSize = textAnimatable.value * labelFontSizePx
         }
 
         val radius = size.minDimension / 4f
@@ -127,6 +134,7 @@ fun PieChart(
         val total = chartData.sumOf { it.value.toDouble() }
 
         val centerPoint = Offset(topLeft.x + size.center.x, topLeft.y + size.center.y)
+
 
         chartData.forEachIndexed { index, data ->
             val proportion = data.value / total
@@ -149,8 +157,46 @@ fun PieChart(
                 val text = String.format("%.2f", proportion * 100) + "%"
                 val textWidth = calculateTextWidth(text, percentTextOptions.fontSize.toPx())
 
-                drawText(text, centerArcX.toFloat() - textWidth / 2, centerArcY.toFloat(), paint)
+                drawText(
+                    text,
+                    centerArcX.toFloat() - textWidth / 2,
+                    centerArcY.toFloat(),
+                    percentTextPaint
+                )
             }
+
+            val labelRectPaint = Paint().apply { isAntiAlias = true }
+
+            drawContext.canvas.nativeCanvas.apply {
+                val width =
+                    if (chartData.size >= MaxChartLabelInOneLine) size.width / MaxChartLabelInOneLine
+                    else size.width / chartData.size
+                var x = width * (index % MaxChartLabelInOneLine)
+                x += topLeft.x
+
+                val y = size.height + labelLineHeight.toPx() *
+                        ceil((index + 1).toFloat() / MaxChartLabelInOneLine)
+
+                labelRectPaint.color = data.color.toArgb()
+                val startRect = x + contentPadding.toPx()
+                val endRect = startRect + width / 4
+
+                drawRect(
+                    startRect,
+                    y - labelFontSizePx,
+                    startRect + (endRect - startRect) * textAnimatable.value,
+                    y + labelFontSizePx / 2,
+                    labelRectPaint
+                )
+
+                drawText(
+                    data.label,
+                    (endRect + contentPadding.toPx()),
+                    y,
+                    labelTextPaint
+                )
+            }
+
             startAngle += sweep
         }
     }

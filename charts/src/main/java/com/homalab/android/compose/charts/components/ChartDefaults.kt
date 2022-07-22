@@ -159,18 +159,18 @@ object ChartDefaults {
         )
     }
 
-    fun defaultPercentTextOptions() = PercentTextOptions(
+    fun defaultTextOptions() = TextOptions(
         fontSize = DefaultAxisLabelFontSize,
         textColor = DefaultAxisLabelColor
     )
 
     @Immutable
-    class PercentTextOptions(
+    class TextOptions(
         val fontSize: TextUnit,
         val textColor: Color
     ) {
         @Stable
         fun copy(fontSize: TextUnit = this.fontSize, textColor: Color = this.textColor) =
-            PercentTextOptions(fontSize, textColor)
+            TextOptions(fontSize, textColor)
     }
 }
