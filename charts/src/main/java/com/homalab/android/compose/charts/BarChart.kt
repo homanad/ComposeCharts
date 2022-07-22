@@ -41,9 +41,10 @@ fun BarChart(
 
     val chartHeight = visibleChartHeight + horizontalAxisLabelHeight
 
-    val leftAreaWidth =
-        (verticalAxisLabelTransform(verticalAxisValues.last()).length * verticalAxisOptions.axisLabelFontSize.toPx()
-            .div(1.75)).toInt() + contentPaddingPx
+    val leftAreaWidth = calculateTextWidth(
+        verticalAxisLabelTransform(verticalAxisValues.last()),
+        verticalAxisOptions.axisLabelFontSize.toPx()
+    ) + contentPaddingPx
 
     var animatedBars by remember {
         mutableStateOf(listOf<BarEntity>())

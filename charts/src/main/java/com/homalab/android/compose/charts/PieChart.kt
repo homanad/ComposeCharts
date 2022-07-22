@@ -7,6 +7,7 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -19,8 +20,11 @@ import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
-import com.homalab.android.compose.charts.components.ChartDefaults
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
+import com.homalab.android.compose.charts.components.*
 import kotlinx.coroutines.delay
+import kotlin.math.ceil
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -30,8 +34,13 @@ fun PieChart(
     chartData: List<PieChartData>,
     pieAnimationOptions: ChartDefaults.PieAnimationOptions = ChartDefaults.defaultPieAnimationOptions(),
     drawStyle: DrawStyle = Fill,
-    percentTextOptions: ChartDefaults.PercentTextOptions = ChartDefaults.defaultPercentTextOptions()
+    percentTextOptions: ChartDefaults.PercentTextOptions = ChartDefaults.defaultPercentTextOptions(),
+    labelTextFontSize: TextUnit = DefaultAxisLabelFontSize,
+    contentPadding: Dp = DefaultContentPadding
 ) {
+    val labelLineHeight = contentPadding * 2 + labelTextFontSize.toDp()
+    val totalChartLabelHeight =
+        labelLineHeight * ceil(chartData.size.toFloat() / MaxChartLabelInOneLine)
 
     val angleAnimatable = if (pieAnimationOptions.isEnabled) remember {
         Animatable(0f)
@@ -92,12 +101,11 @@ fun PieChart(
         )
     })
 
-    val total = chartData.sumOf { it.value.toDouble() }
-    val proportions = chartData.map {
-        it.value / total
-    }
-
-    Canvas(modifier = modifier.aspectRatio(1f)) {
+    Canvas(
+        modifier = modifier
+            .aspectRatio(1f)
+            .padding(bottom = totalChartLabelHeight)
+    ) {
         val innerRadius = size.minDimension / 2
 
         val halfSize = size / 2.0f
@@ -116,11 +124,15 @@ fun PieChart(
 
         val radius = size.minDimension / 4f
 
+        val total = chartData.sumOf { it.value.toDouble() }
+
         val centerPoint = Offset(topLeft.x + size.center.x, topLeft.y + size.center.y)
-        proportions.forEachIndexed { index, d ->
-            val sweep = (d * angleAnimatable.value).toFloat()
+
+        chartData.forEachIndexed { index, data ->
+            val proportion = data.value / total
+            val sweep = (proportion * angleAnimatable.value).toFloat()
             drawArc(
-                color = chartData[index].color,
+                color = data.color,
                 startAngle = startAngle,
                 sweepAngle = sweep,
                 topLeft = topLeft,
@@ -134,9 +146,8 @@ fun PieChart(
                 val centerArcX = cos(Math.toRadians(degree.toDouble())) * radius + centerPoint.x
                 val centerArcY = sin(Math.toRadians(degree.toDouble())) * radius + centerPoint.y
 
-                val text = String.format("%.2f", d * 100) + "%"
-                val textWidth =
-                    (text.length * percentTextOptions.fontSize.toPx()).div(1.75).toFloat()
+                val text = String.format("%.2f", proportion * 100) + "%"
+                val textWidth = calculateTextWidth(text, percentTextOptions.fontSize.toPx())
 
                 drawText(text, centerArcX.toFloat() - textWidth / 2, centerArcY.toFloat(), paint)
             }

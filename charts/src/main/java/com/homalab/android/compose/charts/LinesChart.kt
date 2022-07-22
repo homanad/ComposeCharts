@@ -54,8 +54,10 @@ fun LinesChart(
     val horizontalLabelAreaY = (visibleChartHeight + horizontalAxisLabelHeight).toPx()
     val chartLabelAreaBaseY = (visibleChartHeight + horizontalAxisLabelHeight).toPx()
 
-    val leftAreaWidth = (verticalAxisLabelTransform(verticalAxisValues.last()).length
-            * verticalAxisLabelFontSizePx.div(1.75)).toInt() + contentPaddingPx
+    val leftAreaWidth = calculateTextWidth(
+        verticalAxisLabelTransform(verticalAxisValues.last()),
+        verticalAxisLabelFontSizePx
+    ) + contentPaddingPx
 
     val verticalValuesPaint = Paint().apply {
         textSize = verticalAxisLabelFontSizePx
@@ -213,8 +215,7 @@ fun LinesChart(
                 )
 
                 val textWidth =
-                    (multipleChartData.label.length * verticalAxisLabelFontSizePx).div(1.75)
-                        .toFloat()
+                    calculateTextWidth(multipleChartData.label, verticalAxisLabelFontSizePx)
 
                 drawText(
                     multipleChartData.label,

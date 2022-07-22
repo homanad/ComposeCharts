@@ -32,4 +32,8 @@ fun generateVerticalValues(min: Float, max: Float): List<Float> {
     return list
 }
 
+fun calculateTextWidth(text: String, fontSize: Float): Float {
+    return (text.length * fontSize).div(1.75).toFloat()
+}
+
 private const val MAX_HORIZONTAL_LINE = 5
