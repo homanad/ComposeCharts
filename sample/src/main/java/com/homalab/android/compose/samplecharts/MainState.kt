@@ -10,7 +10,7 @@ class MainState(
 }
 
 enum class ChartDisplay {
-    LINE, BAR, PIE
+    LINE, BAR, PIE, BARS
 }
 
 @Composable
