@@ -3,7 +3,7 @@ package com.homalab.android.compose.samplecharts.charts
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.homalab.android.compose.charts.LinesChart
+import com.homalab.android.compose.charts.LineChart
 import com.homalab.android.compose.charts.MultipleChartData
 import com.homalab.android.compose.charts.MultipleChartValue
 import com.homalab.android.compose.charts.components.ChartDefaults
@@ -11,7 +11,7 @@ import com.homalab.android.compose.charts.components.generateVerticalValues
 
 @Composable
 fun SampleLinesChart(modifier: Modifier = Modifier) {
-    LinesChart(
+    LineChart(
         modifier = modifier,
         chartData = getTestData(),
         verticalAxisValues = generateVerticalValues(6f, 30f).toMutableList(),

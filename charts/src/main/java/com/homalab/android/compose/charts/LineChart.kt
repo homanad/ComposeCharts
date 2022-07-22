@@ -19,7 +19,7 @@ import com.homalab.android.compose.charts.entities.TextEntity
 import kotlin.math.ceil
 
 @Composable
-fun LinesChart(
+fun LineChart(
     modifier: Modifier = Modifier,
     chartData: List<MultipleChartData>,
     verticalAxisValues: MutableList<Float> = mutableListOf(),
