@@ -6,8 +6,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,7 +24,7 @@ fun MainTabs(
     selectedTab: ChartDisplay,
     onTabSelected: (ChartDisplay) -> Unit
 ) {
-    ScrollableTabRow(
+    TabRow(
         selectedTabIndex = selectedTab.ordinal,
         modifier = modifier,
         contentColor = MaterialTheme.colorScheme.onSurface,

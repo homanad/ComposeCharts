@@ -15,7 +15,7 @@ fun SampleBarChart(modifier: Modifier = Modifier) {
         chartData = getChartData(),
         verticalAxisValues = generateVerticalValues(0f, 25f).toMutableList(),
         verticalAxisLabelTransform = { it.toString() },
-        animationOptions = ChartDefaults.defaultAnimationOptions().copy(true)
+        animationOptions = ChartDefaults.defaultAnimationOptions().copy(true, durationMillis = 600)
     )
 }
 

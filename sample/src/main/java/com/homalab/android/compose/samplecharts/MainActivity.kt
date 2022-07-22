@@ -48,7 +48,7 @@ fun SampleApp(mainState: MainState = rememberMainState()) {
         }
     ) { paddingValues ->
         when (mainState.chartDisplay) {
-            ChartDisplay.MULTIPLE_LINES -> {
+            ChartDisplay.LINE -> {
                 SampleLinesChart(
                     modifier = Modifier
                         .fillMaxWidth()

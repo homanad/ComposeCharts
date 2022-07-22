@@ -16,7 +16,7 @@ fun SampleLinesChart(modifier: Modifier = Modifier) {
         chartData = getTestData(),
         verticalAxisValues = generateVerticalValues(6f, 30f).toMutableList(),
         verticalAxisLabelTransform = { it.toString() },
-        animationOptions = ChartDefaults.defaultAnimationOptions().copy(true, 600)
+        animationOptions = ChartDefaults.defaultAnimationOptions().copy(true, 200)
     )
 }
 

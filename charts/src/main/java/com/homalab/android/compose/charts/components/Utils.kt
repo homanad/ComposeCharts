@@ -1,6 +1,11 @@
 package com.homalab.android.compose.charts.components
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.NativePaint
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
@@ -34,6 +39,14 @@ fun generateVerticalValues(min: Float, max: Float): List<Float> {
 
 fun calculateTextWidth(text: String, fontSize: Float): Float {
     return (text.length * fontSize).div(1.75).toFloat()
+}
+
+fun Offset.toSize(topLeftOffset: Offset): Size {
+    return Size(x - topLeftOffset.x, y - topLeftOffset.y)
+}
+
+fun DrawScope.drawText(text: String, x: Float, y: Float, paint: NativePaint) {
+    drawContext.canvas.nativeCanvas.drawText(text, x, y, paint)
 }
 
 private const val MAX_HORIZONTAL_LINE = 5

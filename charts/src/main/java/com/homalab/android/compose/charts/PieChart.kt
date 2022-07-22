@@ -1,6 +1,5 @@
 package com.homalab.android.compose.charts
 
-import android.graphics.Paint
 import android.text.TextPaint
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing
@@ -8,7 +7,6 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -19,7 +17,6 @@ import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Fill
-import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import com.homalab.android.compose.charts.components.*
@@ -34,13 +31,11 @@ fun PieChart(
     chartData: List<PieChartData>,
     pieAnimationOptions: ChartDefaults.PieAnimationOptions = ChartDefaults.defaultPieAnimationOptions(),
     drawStyle: DrawStyle = Fill,
-    percentTextOptions: ChartDefaults.TextOptions = ChartDefaults.defaultTextOptions(),
+    percentageTextOptions: ChartDefaults.TextOptions = ChartDefaults.defaultTextOptions(),
     labelTextOptions: ChartDefaults.TextOptions = ChartDefaults.defaultTextOptions(),
     contentPadding: Dp = DefaultContentPadding
 ) {
     val labelLineHeight = contentPadding * 2 + labelTextOptions.fontSize.toDp()
-    val totalChartLabelHeight =
-        labelLineHeight * ceil(chartData.size.toFloat() / MaxChartLabelInOneLine)
 
     val angleAnimatable = if (pieAnimationOptions.isEnabled) remember {
         Animatable(0f)
@@ -102,9 +97,7 @@ fun PieChart(
     })
 
     Canvas(
-        modifier = modifier
-            .aspectRatio(1f)
-            .padding(bottom = totalChartLabelHeight)
+        modifier = modifier.aspectRatio(1f)
     ) {
         val innerRadius = size.minDimension / 2
 
@@ -118,8 +111,8 @@ fun PieChart(
 
         val percentTextPaint = TextPaint().apply {
             isAntiAlias = true
-            color = percentTextOptions.textColor.toArgb()
-            textSize = textAnimatable.value * percentTextOptions.fontSize.toPx()
+            color = percentageTextOptions.textColor.toArgb()
+            textSize = textAnimatable.value * percentageTextOptions.fontSize.toPx()
         }
 
         val labelFontSizePx = labelTextOptions.fontSize.toPx()
@@ -135,7 +128,6 @@ fun PieChart(
 
         val centerPoint = Offset(topLeft.x + size.center.x, topLeft.y + size.center.y)
 
-
         chartData.forEachIndexed { index, data ->
             val proportion = data.value / total
             val sweep = (proportion * angleAnimatable.value).toFloat()
@@ -148,54 +140,51 @@ fun PieChart(
                 useCenter = true,
                 style = drawStyle
             )
-            drawContext.canvas.nativeCanvas.run {
-                val degree = 360 + startAngle + sweep / 2
 
-                val centerArcX = cos(Math.toRadians(degree.toDouble())) * radius + centerPoint.x
-                val centerArcY = sin(Math.toRadians(degree.toDouble())) * radius + centerPoint.y
+            //draw percentage text
+            val degree = 360 + startAngle + sweep / 2
 
-                val text = String.format("%.2f", proportion * 100) + "%"
-                val textWidth = calculateTextWidth(text, percentTextOptions.fontSize.toPx())
+            val centerArcX = cos(Math.toRadians(degree.toDouble())) * radius + centerPoint.x
+            val centerArcY = sin(Math.toRadians(degree.toDouble())) * radius + centerPoint.y
 
-                drawText(
-                    text,
-                    centerArcX.toFloat() - textWidth / 2,
-                    centerArcY.toFloat(),
-                    percentTextPaint
-                )
-            }
+            val text = String.format("%.2f", proportion * 100) + "%"
+            val textWidth = calculateTextWidth(text, percentageTextOptions.fontSize.toPx())
 
-            val labelRectPaint = Paint().apply { isAntiAlias = true }
+            drawText(
+                text,
+                centerArcX.toFloat() - textWidth / 2,
+                centerArcY.toFloat(),
+                percentTextPaint
+            )
 
-            drawContext.canvas.nativeCanvas.apply {
-                val width =
-                    if (chartData.size >= MaxChartLabelInOneLine) size.width / MaxChartLabelInOneLine
-                    else size.width / chartData.size
-                var x = width * (index % MaxChartLabelInOneLine)
-                x += topLeft.x
+            //draw labels
+            val width =
+                if (chartData.size >= MaxChartLabelInOneLine) size.width / MaxChartLabelInOneLine
+                else size.width / chartData.size
+            var x = width * (index % MaxChartLabelInOneLine)
+            x += topLeft.x
 
-                val y = size.height + labelLineHeight.toPx() *
-                        ceil((index + 1).toFloat() / MaxChartLabelInOneLine)
+            val y = size.height + labelLineHeight.toPx() *
+                    ceil((index + 1).toFloat() / MaxChartLabelInOneLine)
 
-                labelRectPaint.color = data.color.toArgb()
-                val startRect = x + contentPadding.toPx()
-                val endRect = startRect + width / 4
+            val startRect = x + contentPadding.toPx()
+            val endRect = startRect + width / 4
 
-                drawRect(
-                    startRect,
-                    y - labelFontSizePx,
+            val rectTopLeft = Offset(startRect, y - labelFontSizePx)
+            drawRect(
+                color = data.color,
+                topLeft = rectTopLeft,
+                size = Offset(
                     startRect + (endRect - startRect) * textAnimatable.value,
-                    y + labelFontSizePx / 2,
-                    labelRectPaint
-                )
-
-                drawText(
-                    data.label,
-                    (endRect + contentPadding.toPx()),
-                    y,
-                    labelTextPaint
-                )
-            }
+                    y + labelFontSizePx / 2
+                ).toSize(rectTopLeft)
+            )
+            drawText(
+                data.label,
+                (endRect + contentPadding.toPx()),
+                y,
+                labelTextPaint
+            )
 
             startAngle += sweep
         }

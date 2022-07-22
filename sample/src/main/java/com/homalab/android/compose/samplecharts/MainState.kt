@@ -10,9 +10,9 @@ class MainState(
 }
 
 enum class ChartDisplay {
-    MULTIPLE_LINES, BAR, PIE
+    LINE, BAR, PIE
 }
 
 @Composable
-fun rememberMainState(chartDisplay: ChartDisplay = ChartDisplay.MULTIPLE_LINES) =
+fun rememberMainState(chartDisplay: ChartDisplay = ChartDisplay.LINE) =
     remember { MainState(chartDisplay) }

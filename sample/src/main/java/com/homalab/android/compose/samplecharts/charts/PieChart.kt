@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.unit.dp
 import com.homalab.android.compose.charts.PieChart
 import com.homalab.android.compose.charts.PieChartData
+import com.homalab.android.compose.charts.components.ChartDefaults
 
 @Composable
 fun SamplePieChart(modifier: Modifier = Modifier) {
@@ -19,5 +20,13 @@ fun SamplePieChart(modifier: Modifier = Modifier) {
         PieChartData("label 5", 11f, Color.Cyan),
     )
 
-    PieChart(modifier = modifier.padding(16.dp), chartData = chartData, drawStyle = Fill)
+    PieChart(
+        modifier = modifier.padding(16.dp),
+        chartData = chartData,
+        drawStyle = Fill,
+        pieAnimationOptions = ChartDefaults.defaultPieAnimationOptions().copy(
+            angleDurationMillis = 1500,
+            shiftDurationMillis = 1500
+        )
+    )
 }

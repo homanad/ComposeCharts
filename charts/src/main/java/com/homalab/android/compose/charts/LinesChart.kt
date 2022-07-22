@@ -104,14 +104,12 @@ fun LinesChart(
             val x = leftAreaWidth / 2.toFloat()
             val y = verticalAxisHeight - (verticalAxisValuesDistance).times(index)
 
-            drawContext.canvas.nativeCanvas.run {
-                drawText(
-                    verticalAxisLabelTransform(value),
-                    x,
-                    y + verticalAxisLabelFontSizePx / 2,
-                    verticalValuesPaint
-                )
-            }
+            drawText(
+                verticalAxisLabelTransform(value),
+                x,
+                y + verticalAxisLabelFontSizePx / 2,
+                verticalValuesPaint
+            )
 
             //don't draw min line
             if (horizontalLineOptions.showHorizontalLines && index != 0)
@@ -231,10 +229,8 @@ fun LinesChart(
             }
         }
 
-        drawContext.canvas.nativeCanvas.apply {
-            textOffsets.forEach {
-                drawText(it.text, it.offset.x, horizontalLabelAreaY, horizontalValuesPaint)
-            }
+        textOffsets.forEach {
+            drawText(it.text, it.offset.x, horizontalLabelAreaY, horizontalValuesPaint)
         }
 
         if (!animationOptions.isEnabled) circleEntities.forEach {

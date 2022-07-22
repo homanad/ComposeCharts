@@ -10,7 +10,6 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import com.homalab.android.compose.charts.components.*
@@ -88,14 +87,12 @@ fun BarChart(
             val x = leftAreaWidth / 2.toFloat()
             val y = verticalAxisLength - (distanceBetweenVerticalAxisValues).times(index)
 
-            drawContext.canvas.nativeCanvas.run {
-                drawText(
-                    verticalAxisLabelTransform(fl),
-                    x,
-                    y + verticalAxisOptions.axisLabelFontSize.toPx() / 2,
-                    verticalValuesTextPaint
-                )
-            }
+            drawText(
+                verticalAxisLabelTransform(fl),
+                x,
+                y + verticalAxisOptions.axisLabelFontSize.toPx() / 2,
+                verticalValuesTextPaint
+            )
 
             if (horizontalLineOptions.showHorizontalLines && index != 0)
                 drawLine(
@@ -147,14 +144,12 @@ fun BarChart(
                 size = rect.bottomRight.toSize(rect.topLeft)
             )
 
-            drawContext.canvas.nativeCanvas.run {
-                drawText(
-                    barChartData.label,
-                    center,
-                    verticalAxisLength + horizontalAxisLabelHeight.toPx(),
-                    horizontalValuesTextPaint
-                )
-            }
+            drawText(
+                barChartData.label,
+                center,
+                verticalAxisLength + horizontalAxisLabelHeight.toPx(),
+                horizontalValuesTextPaint
+            )
         }
 
         animatedBars = rectFs
@@ -175,11 +170,6 @@ private fun generateVerticaAxisValues(chartData: List<BarChartData>): List<Float
         addAll(chartData.map { it.barValue })
     }
     return generateVerticalValues(values.minOf { it }, values.maxOf { it })
-}
-
-
-private fun Offset.toSize(topLeftOffset: Offset): Size {
-    return Size(x - topLeftOffset.x, y - topLeftOffset.y)
 }
 
 private fun calculateRect(
