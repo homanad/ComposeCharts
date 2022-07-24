@@ -20,7 +20,7 @@ const val DefaultCirclePointRatio = 1.5f
 const val DefaultUpscaleRatioStep = 0.5f
 const val MaxChartLabelInOneLine = 3
 const val DEFAULT_DURATION = 150
-const val DefaultBarWidthRatio = 0.7f
+const val DefaultBarWidthRatio = 0.8f
 
 object ChartDefaults {
 

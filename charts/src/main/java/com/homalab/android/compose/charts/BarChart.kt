@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import com.homalab.android.compose.charts.components.*
 import com.homalab.android.compose.charts.entities.BarEntity
+import kotlin.math.ceil
 
 @Composable
 fun BarChart(
@@ -38,7 +39,11 @@ fun BarChart(
         horizontalLineOptions.horizontalLineSpacing * (verticalAxisValues.size - 1)
     val horizontalAxisLabelHeight = contentPadding + horizontalAxisOptions.axisLabelFontSize.toDp()
 
-    val chartHeight = visibleChartHeight + horizontalAxisLabelHeight
+    val totalChartLabelHeight =
+        horizontalAxisLabelHeight * ceil(chartData.size.toFloat() / MaxChartLabelInOneLine)
+
+    val chartHeight = visibleChartHeight + horizontalAxisLabelHeight + totalChartLabelHeight
+    val chartLabelBaseY = (visibleChartHeight + horizontalAxisLabelHeight).toPx()
 
     val leftAreaWidth = calculateTextWidth(
         verticalAxisLabelTransform(verticalAxisValues.last()),
@@ -106,52 +111,112 @@ fun BarChart(
                 )
         }
 
-        val barWidth = horizontalAxisLength / chartData.size
         val minValue = verticalAxisValues.minOf { it }
         val deltaRange = verticalAxisValues.maxOf { it } - minValue
 
         val rectFs = mutableListOf<BarEntity>()
 
-        chartData.forEachIndexed { index, barChartData ->
-            var start = barWidth * index
+        val labelRectPaint = Paint().apply { isAntiAlias = true }
+        val horizontalValuesPaint = Paint().apply {
+            textSize = horizontalAxisOptions.axisLabelFontSize.toPx()
+            color = horizontalAxisOptions.axisLabelColor.toArgb()
+            textAlign = Paint.Align.CENTER
+            isAntiAlias = true
+        }
+        val valueLabels = mutableSetOf<String>().apply {
+            chartData.forEachIndexed { index, barChartData ->
+                addAll(barChartData.values.map { value -> value.valueLabel })
+
+                val width =
+                    if (chartData.size >= MaxChartLabelInOneLine) horizontalAxisLength / MaxChartLabelInOneLine
+                    else horizontalAxisLength / chartData.size
+                var x = width * (index % MaxChartLabelInOneLine)
+                x += leftAreaWidth
+
+                val y = chartLabelBaseY + horizontalAxisLabelHeight.toPx() *
+                        ceil((index + 1).toFloat() / MaxChartLabelInOneLine)
+
+                labelRectPaint.color = barChartData.barColor.toArgb()
+                val startRect = x + contentPaddingPx
+                val endRect = startRect + width / 4
+
+                val topLeft = Offset(startRect, y - horizontalAxisOptions.axisLabelFontSize.toPx())
+                drawRect(
+                    color = barChartData.barColor,
+                    topLeft = topLeft,
+                    size = Offset(
+                        endRect,
+                        y + horizontalAxisOptions.axisLabelFontSize.toPx() / 2
+                    ).toSize(topLeft)
+                )
+
+                val textWidth =
+                    calculateTextWidth(
+                        barChartData.label,
+                        horizontalAxisOptions.axisLabelFontSize.toPx()
+                    )
+
+                drawText(
+                    barChartData.label,
+                    (endRect + contentPaddingPx + textWidth / 2),
+                    y,
+                    horizontalValuesPaint
+                )
+            }
+        }
+
+        val areaWidth = horizontalAxisLength / valueLabels.size
+
+        val calculatedOneAreaWidth = (areaWidth * barWidthRatio)
+
+        valueLabels.forEachIndexed { index, label ->
+            val values = mutableListOf<BarValue>().apply {
+                chartData.forEach {
+                    if (it.values.size > index) add(it.values[index])
+                }
+            }
+            var start = areaWidth * index
             start += leftAreaWidth
 
-            val center = start + barWidth / 2
+            val barWidth = calculatedOneAreaWidth / chartData.size
 
-            val calculatedBarWidth = barWidth * barWidthRatio
-            val left = center - calculatedBarWidth / 2
-            val right = left + calculatedBarWidth
+            val center = start + areaWidth / 2
+            start = center - calculatedOneAreaWidth / 2
 
-            val rect = calculateRect(
-                left = left,
-                right = right,
-                value = barChartData.barValue,
-                minValue = minValue,
-                deltaRange = deltaRange,
-                verticalAxisLength = verticalAxisLength
-            )
+            values.forEachIndexed { i, barValue ->
 
-            if (animationOptions.isEnabled) {
-                rectFs.add(
-                    BarEntity(
-                        barChartData.barColor,
-                        Rect(rect.left, rect.top, rect.right, rect.bottom)
-                    )
+                val startX = start + barWidth * i
+
+                val rect = calculateRect(
+                    left = startX,
+                    right = startX + barWidth,
+                    value = barValue.value,
+                    minValue = minValue,
+                    deltaRange = deltaRange,
+                    verticalAxisLength = verticalAxisLength
                 )
-            } else drawRect(
-                color = barChartData.barColor,
-                topLeft = rect.topLeft,
-                size = rect.bottomRight.toSize(rect.topLeft)
-            )
+
+                if (animationOptions.isEnabled) {
+                    rectFs.add(
+                        BarEntity(
+                            chartData[i].barColor,
+                            Rect(rect.left, rect.top, rect.right, rect.bottom)
+                        )
+                    )
+                } else drawRect(
+                    color = chartData[i].barColor,
+                    topLeft = rect.topLeft,
+                    size = rect.bottomRight.toSize(rect.topLeft)
+                )
+            }
 
             drawText(
-                barChartData.label,
+                label,
                 center,
                 verticalAxisLength + horizontalAxisLabelHeight.toPx(),
                 horizontalValuesTextPaint
             )
         }
-
         animatedBars = rectFs
     }
 
@@ -167,7 +232,11 @@ fun BarChart(
 
 private fun generateVerticaAxisValues(chartData: List<BarChartData>): List<Float> {
     val values = mutableListOf<Float>().apply {
-        addAll(chartData.map { it.barValue })
+        chartData.forEach {
+            addAll(it.values.map { barValue ->
+                barValue.value
+            })
+        }
     }
     return generateVerticalValues(values.minOf { it }, values.maxOf { it })
 }
@@ -189,7 +258,12 @@ private fun calculateRect(
 }
 
 data class BarChartData(
+    val values: List<BarValue>,
     val barColor: Color,
-    val barValue: Float,
     val label: String
+)
+
+data class BarValue(
+    val value: Float,
+    val valueLabel: String,
 )
