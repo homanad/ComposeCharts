@@ -52,21 +52,21 @@ fun SampleApp(mainState: MainState = rememberMainState()) {
                 SampleLinesChart(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = paddingValues.calculateTopPadding() + 16.dp)
+                        .padding(top = paddingValues.calculateTopPadding() + 48.dp)
                 )
             }
             ChartDisplay.BAR -> {
                 SampleBarChart(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = paddingValues.calculateTopPadding() + 16.dp)
+                        .padding(top = paddingValues.calculateTopPadding() + 48.dp)
                 )
             }
             ChartDisplay.PIE -> {
                 SamplePieChart(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = paddingValues.calculateTopPadding() + 16.dp)
+                        .padding(top = paddingValues.calculateTopPadding() + 48.dp)
                 )
             }
         }
