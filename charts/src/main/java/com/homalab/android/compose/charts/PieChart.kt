@@ -48,7 +48,7 @@ fun PieChart(
     }
 
     val textAnimatable = remember {
-        Animatable(0f)
+        if (pieAnimationOptions.isEnabled) Animatable(0f) else Animatable(1f)
     }
 
     LaunchedEffect(angleAnimatable, block = {

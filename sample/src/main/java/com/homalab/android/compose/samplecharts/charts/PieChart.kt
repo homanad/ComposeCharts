@@ -26,7 +26,8 @@ fun SamplePieChart(modifier: Modifier = Modifier) {
         drawStyle = Fill,
         pieAnimationOptions = ChartDefaults.defaultPieAnimationOptions().copy(
             angleDurationMillis = 1500,
-            shiftDurationMillis = 1500
+            shiftDurationMillis = 1500,
+            isEnabled = true
         )
     )
 }
