@@ -54,6 +54,8 @@ fun BarChart(
         mutableStateOf(listOf<BarEntity>())
     }
 
+    val labelFontSizePx = horizontalAxisOptions.axisLabelFontSize.toPx()
+
     Canvas(modifier = modifier.height(chartHeight)) {
         val verticalAxisLength = visibleChartHeight.toPx()
         val horizontalAxisLength = size.width - leftAreaWidth
@@ -83,7 +85,7 @@ fun BarChart(
         }
 
         val horizontalValuesTextPaint = Paint().apply {
-            textSize = horizontalAxisOptions.axisLabelFontSize.toPx()
+            textSize = labelFontSizePx
             color = horizontalAxisOptions.axisLabelColor.toArgb()
             textAlign = Paint.Align.CENTER
             isAntiAlias = true
@@ -118,7 +120,7 @@ fun BarChart(
 
         val labelRectPaint = Paint().apply { isAntiAlias = true }
         val horizontalValuesPaint = Paint().apply {
-            textSize = horizontalAxisOptions.axisLabelFontSize.toPx()
+            textSize = labelFontSizePx
             color = horizontalAxisOptions.axisLabelColor.toArgb()
             textAlign = Paint.Align.CENTER
             isAntiAlias = true
@@ -140,20 +142,20 @@ fun BarChart(
                 val startRect = x + contentPaddingPx
                 val endRect = startRect + width / 4
 
-                val topLeft = Offset(startRect, y - horizontalAxisOptions.axisLabelFontSize.toPx())
+                val topLeft = Offset(startRect, y - labelFontSizePx)
                 drawRect(
                     color = barChartData.barColor,
                     topLeft = topLeft,
                     size = Offset(
                         endRect,
-                        y + horizontalAxisOptions.axisLabelFontSize.toPx() / 2
+                        y + labelFontSizePx / 2
                     ).toSize(topLeft)
                 )
 
                 val textWidth =
                     calculateTextWidth(
                         barChartData.label,
-                        horizontalAxisOptions.axisLabelFontSize.toPx()
+                        labelFontSizePx
                     )
 
                 drawText(
