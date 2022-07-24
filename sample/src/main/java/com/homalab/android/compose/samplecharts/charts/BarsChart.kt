@@ -39,6 +39,7 @@ private fun getBarsData(): List<BarChartData2> {
             BarValue(10f, "2022/03"),
             BarValue(14f, "2022/04"),
             BarValue(11f, "2022/05"),
+            BarValue(13f, "2022/06"),
         ),
         barColor = Color.Gray,
         label = "Chart2"

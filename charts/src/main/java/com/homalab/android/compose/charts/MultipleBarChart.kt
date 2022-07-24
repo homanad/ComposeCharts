@@ -111,21 +111,26 @@ fun BarChart2(
 
         val rectFs = mutableListOf<BarEntity>()
 
-        var largestLength = 0
-        chartData.forEach {
-            if (it.values.size > largestLength) largestLength = it.values.size
+        val valueLabels = mutableSetOf<String>().apply {
+            chartData.forEach {
+                addAll(it.values.map { value -> value.valueLabel })
+            }
         }
 
-        val areaWidth = horizontalAxisLength / largestLength
+        val areaWidth = horizontalAxisLength / valueLabels.size
 
         val calculatedOneAreaWidth = (areaWidth * barWidthRatio)
 
-        for (index in 0 until largestLength) {
-            val values = chartData.map { it.values[index] }
+        valueLabels.forEachIndexed { index, label ->
+            val values = mutableListOf<BarValue>().apply {
+                chartData.forEach {
+                    if (it.values.size > index) add(it.values[index])
+                }
+            }
             var start = areaWidth * index
             start += leftAreaWidth
 
-            val barWidth = calculatedOneAreaWidth / values.size
+            val barWidth = calculatedOneAreaWidth / chartData.size
 
             val center = start + areaWidth / 2
             start = center - calculatedOneAreaWidth / 2
@@ -156,13 +161,14 @@ fun BarChart2(
                     size = rect.bottomRight.toSize(rect.topLeft)
                 )
 
-                drawText(
-                    chartData[i].values[index].valueLabel,
-                    center,
-                    verticalAxisLength + horizontalAxisLabelHeight.toPx(),
-                    horizontalValuesTextPaint
-                )
             }
+
+            drawText(
+                label,
+                center,
+                verticalAxisLength + horizontalAxisLabelHeight.toPx(),
+                horizontalValuesTextPaint
+            )
         }
         animatedBars = rectFs
     }
