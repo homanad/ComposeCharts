@@ -1,6 +1,8 @@
 package com.homalab.android.compose.charts
 
 import android.graphics.Paint
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.*
@@ -45,16 +47,28 @@ fun BarChart(
     val chartHeight = visibleChartHeight + horizontalAxisLabelHeight + totalChartLabelHeight
     val chartLabelBaseY = (visibleChartHeight + horizontalAxisLabelHeight).toPx()
 
+    val horizontalLabelFontSizePx = horizontalAxisOptions.axisLabelFontSize.toPx()
+    val verticalLabelFontSizePx = verticalAxisOptions.axisLabelFontSize.toPx()
+
     val leftAreaWidth = calculateTextWidth(
         verticalAxisLabelTransform(verticalAxisValues.last()),
-        verticalAxisOptions.axisLabelFontSize.toPx()
+        verticalLabelFontSizePx
     ) + contentPaddingPx
 
     var animatedBars by remember {
         mutableStateOf(listOf<BarEntity>())
     }
 
-    val labelFontSizePx = horizontalAxisOptions.axisLabelFontSize.toPx()
+
+    val chartAnimatable = remember {
+        if (animationOptions.isEnabled) Animatable(0f) else Animatable(1f)
+    }
+
+    LaunchedEffect(key1 = chartAnimatable, block = {
+        if (!animationOptions.isEnabled) return@LaunchedEffect
+
+        chartAnimatable.animateTo(targetValue = 1f, animationSpec = tween(durationMillis = 600))
+    })
 
     Canvas(modifier = modifier.height(chartHeight)) {
         val verticalAxisLength = visibleChartHeight.toPx()
@@ -66,26 +80,29 @@ fun BarChart(
         drawRect(
             color = horizontalAxisOptions.axisColor,
             topLeft = Offset(leftAreaWidth, verticalAxisLength),
-            size = Size(horizontalAxisLength, horizontalAxisThicknessPx)
+            size = Size(horizontalAxisLength * chartAnimatable.value, horizontalAxisThicknessPx)
         )
 
         //draw vertical axis
         drawRect(
             color = verticalAxisOptions.axisColor,
-            topLeft = Offset(leftAreaWidth, 0.0f),
-            size = Size(verticalAxisThicknessPx, verticalAxisLength)
+            topLeft = Offset(
+                leftAreaWidth,
+                verticalAxisLength - verticalAxisLength * chartAnimatable.value
+            ),
+            size = Size(verticalAxisThicknessPx, verticalAxisLength * chartAnimatable.value)
         )
 
         //draw horizontal lines & labels
         val verticalValuesTextPaint = Paint().apply {
-            textSize = verticalAxisOptions.axisLabelFontSize.toPx()
+            textSize = verticalLabelFontSizePx * chartAnimatable.value
             color = verticalAxisOptions.axisLabelColor.toArgb()
             textAlign = Paint.Align.CENTER
             isAntiAlias = true
         }
 
         val horizontalValuesTextPaint = Paint().apply {
-            textSize = labelFontSizePx
+            textSize = horizontalLabelFontSizePx * chartAnimatable.value
             color = horizontalAxisOptions.axisLabelColor.toArgb()
             textAlign = Paint.Align.CENTER
             isAntiAlias = true
@@ -97,14 +114,14 @@ fun BarChart(
             drawText(
                 verticalAxisLabelTransform(fl),
                 x,
-                y + verticalAxisOptions.axisLabelFontSize.toPx() / 2,
+                y + verticalLabelFontSizePx / 2,
                 verticalValuesTextPaint
             )
 
             if (horizontalLineOptions.showHorizontalLines && index != 0)
                 drawLine(
                     start = Offset(leftAreaWidth, y),
-                    end = Offset(leftAreaWidth + horizontalAxisLength, y),
+                    end = Offset(leftAreaWidth + horizontalAxisLength * chartAnimatable.value, y),
                     color = horizontalLineOptions.horizontalLineColor,
                     strokeWidth = horizontalLineOptions.horizontalLineThickness.toPx(),
                     pathEffect = if (horizontalLineOptions.horizontalLineStyle == HorizontalLineStyle.DASH) PathEffect.dashPathEffect(
@@ -120,7 +137,7 @@ fun BarChart(
 
         val labelRectPaint = Paint().apply { isAntiAlias = true }
         val horizontalValuesPaint = Paint().apply {
-            textSize = labelFontSizePx
+            textSize = horizontalLabelFontSizePx * chartAnimatable.value
             color = horizontalAxisOptions.axisLabelColor.toArgb()
             textAlign = Paint.Align.CENTER
             isAntiAlias = true
@@ -142,20 +159,20 @@ fun BarChart(
                 val startRect = x + contentPaddingPx
                 val endRect = startRect + width / 4
 
-                val topLeft = Offset(startRect, y - labelFontSizePx)
+                val topLeft = Offset(startRect, y - horizontalLabelFontSizePx)
                 drawRect(
                     color = barChartData.barColor,
                     topLeft = topLeft,
                     size = Offset(
-                        endRect,
-                        y + labelFontSizePx / 2
+                        startRect + (endRect - startRect) * chartAnimatable.value,
+                        y + horizontalLabelFontSizePx / 2
                     ).toSize(topLeft)
                 )
 
                 val textWidth =
                     calculateTextWidth(
                         barChartData.label,
-                        labelFontSizePx
+                        horizontalLabelFontSizePx
                     )
 
                 drawText(

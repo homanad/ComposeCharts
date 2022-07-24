@@ -1,6 +1,8 @@
 package com.homalab.android.compose.charts
 
 import android.graphics.Paint
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.*
@@ -9,7 +11,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import com.homalab.android.compose.charts.components.*
@@ -59,15 +60,28 @@ fun LineChart(
         verticalAxisLabelFontSizePx
     ) + contentPaddingPx
 
+    val chartAnimatable = remember {
+        if (animationOptions.isEnabled) Animatable(0f) else Animatable(1f)
+    }
+
+    LaunchedEffect(key1 = chartAnimatable, block = {
+        if (!animationOptions.isEnabled) return@LaunchedEffect
+
+        chartAnimatable.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 600)
+        )
+    })
+
     val verticalValuesPaint = Paint().apply {
-        textSize = verticalAxisLabelFontSizePx
+        textSize = verticalAxisLabelFontSizePx * chartAnimatable.value
         color = verticalAxisOptions.axisLabelColor.toArgb()
         textAlign = Paint.Align.CENTER
         isAntiAlias = true
     }
 
     val horizontalValuesPaint = Paint().apply {
-        textSize = horizontalAxisLabelFontSizePx
+        textSize = horizontalAxisLabelFontSizePx * chartAnimatable.value
         color = horizontalAxisOptions.axisLabelColor.toArgb()
         textAlign = Paint.Align.CENTER
         isAntiAlias = true
@@ -89,14 +103,17 @@ fun LineChart(
         drawRect(
             color = horizontalAxisOptions.axisColor,
             topLeft = Offset(leftAreaWidth, verticalAxisHeight),
-            size = Size(horizontalAxisWidth, horizontalAxisThicknessPx)
+            size = Size(horizontalAxisWidth * chartAnimatable.value, horizontalAxisThicknessPx)
         )
 
         //draw vertical axis
         drawRect(
             color = verticalAxisOptions.axisColor,
-            topLeft = Offset(leftAreaWidth, 0.0f),
-            size = Size(verticalAxisThicknessPx, verticalAxisHeight)
+            topLeft = Offset(
+                leftAreaWidth,
+                verticalAxisHeight - verticalAxisHeight * chartAnimatable.value
+            ),
+            size = Size(verticalAxisThicknessPx, verticalAxisHeight * chartAnimatable.value)
         )
 
         //draw horizontal lines & labels
@@ -115,7 +132,7 @@ fun LineChart(
             if (horizontalLineOptions.showHorizontalLines && index != 0)
                 drawLine(
                     start = Offset(leftAreaWidth, y),
-                    end = Offset(size.width, y),
+                    end = Offset(size.width * chartAnimatable.value, y),
                     color = horizontalLineOptions.horizontalLineColor,
                     strokeWidth = horizontalLineOptions.horizontalLineThickness.toPx(),
                     pathEffect = if (horizontalLineOptions.horizontalLineStyle == HorizontalLineStyle.DASH)
@@ -189,44 +206,42 @@ fun LineChart(
                 previousOffset = currentOffset
             }
 
-            val labelRectPaint = Paint().apply { isAntiAlias = true }
-            drawContext.canvas.nativeCanvas.apply {
-                val width =
-                    if (chartData.size >= MaxChartLabelInOneLine) horizontalAxisWidth / MaxChartLabelInOneLine
-                    else horizontalAxisWidth / chartData.size
-                var x = width * (i % MaxChartLabelInOneLine)
-                x += leftAreaWidth
+            val width =
+                if (chartData.size >= MaxChartLabelInOneLine) horizontalAxisWidth / MaxChartLabelInOneLine
+                else horizontalAxisWidth / chartData.size
+            var x = width * (i % MaxChartLabelInOneLine)
+            x += leftAreaWidth
 
-                val y = chartLabelAreaBaseY + chartLabelLineHeight.toPx() *
-                        ceil((i + 1).toFloat() / MaxChartLabelInOneLine)
+            val y = chartLabelAreaBaseY + chartLabelLineHeight.toPx() *
+                    ceil((i + 1).toFloat() / MaxChartLabelInOneLine)
 
-                labelRectPaint.color = multipleChartData.lineColor.toArgb()
-                val startRect = x + contentPaddingPx
-                val endRect = startRect + width / 4
+            val startRect = x + contentPaddingPx
+            val endRect = startRect + width / 4
 
-                drawRect(
-                    startRect,
-                    y - horizontalAxisLabelFontSizePx,
-                    endRect,
-                    y + horizontalAxisLabelFontSizePx / 2,
-                    labelRectPaint
-                )
+            val rectTopLeft = Offset(startRect, y - horizontalAxisLabelFontSizePx)
+            drawRect(
+                color = multipleChartData.lineColor,
+                topLeft = rectTopLeft,
+                size = Offset(
+                    startRect + (endRect - startRect) * chartAnimatable.value,
+                    y + horizontalAxisLabelFontSizePx / 2
+                ).toSize(rectTopLeft)
+            )
 
-                val textWidth =
-                    calculateTextWidth(multipleChartData.label, verticalAxisLabelFontSizePx)
+            val textWidth =
+                calculateTextWidth(multipleChartData.label, verticalAxisLabelFontSizePx)
 
-                drawText(
-                    multipleChartData.label,
-                    (endRect + contentPaddingPx + textWidth / 2),
-                    y,
-                    horizontalValuesPaint
-                )
-            }
+            drawText(
+                multipleChartData.label,
+                (endRect + contentPaddingPx + textWidth / 2),
+                y,
+                horizontalValuesPaint
+            )
+        }
 
-            if (animationOptions.isEnabled) {
-                animatedLineEntities = lineEntities
-                animatedCircles = circleEntities
-            }
+        if (animationOptions.isEnabled) {
+            animatedLineEntities = lineEntities
+            animatedCircles = circleEntities
         }
 
         textOffsets.forEach {
