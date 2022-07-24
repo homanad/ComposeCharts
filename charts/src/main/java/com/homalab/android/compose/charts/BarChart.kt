@@ -170,9 +170,9 @@ fun BarChart(
         val calculatedOneAreaWidth = (areaWidth * barWidthRatio)
 
         valueLabels.forEachIndexed { index, label ->
-            val values = mutableListOf<BarValue>().apply {
+            val values = mutableListOf<Float>().apply {
                 chartData.forEach {
-                    if (it.values.size > index) add(it.values[index])
+                    if (it.values.size > index) add(it.values[index].value) else add(0f)
                 }
             }
             var start = areaWidth * index
@@ -190,7 +190,7 @@ fun BarChart(
                 val rect = calculateRect(
                     left = startX,
                     right = startX + barWidth,
-                    value = barValue.value,
+                    value = barValue,
                     minValue = minValue,
                     deltaRange = deltaRange,
                     verticalAxisLength = verticalAxisLength

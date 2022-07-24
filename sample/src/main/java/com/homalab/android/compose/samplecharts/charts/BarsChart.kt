@@ -16,56 +16,57 @@ fun SampleBarChart(modifier: Modifier = Modifier) {
         chartData = getBarsData(),
         verticalAxisValues = generateVerticalValues(0f, 25f).toMutableList(),
         verticalAxisLabelTransform = { it.toString() },
-        animationOptions = ChartDefaults.defaultAnimationOptions().copy(true, durationMillis = 600)
+        animationOptions = ChartDefaults.defaultAnimationOptions().copy(true, durationMillis = 200)
     )
 }
 
 private fun getBarsData(): List<BarChartData> {
     val barData1 = BarChartData(
         values = listOf(
-            BarValue(10f, "2022/01"),
-            BarValue(20f, "2022/02"),
-            BarValue(15f, "2022/03"),
-            BarValue(13f, "2022/04"),
-            BarValue(14f, "2022/05"),
+            BarValue(10f, "Jan"),
+            BarValue(20f, "Feb"),
+            BarValue(15f, "Mar"),
+            BarValue(13f, "Apr"),
+            BarValue(14f, "May"),
         ),
         barColor = Color.Blue,
-        label = "Chart1"
+        label = "Data 1"
     )
     val barData2 = BarChartData(
         values = listOf(
-            BarValue(16f, "2022/01"),
-            BarValue(12f, "2022/02"),
-            BarValue(10f, "2022/03"),
-            BarValue(14f, "2022/04"),
-            BarValue(11f, "2022/05"),
-            BarValue(13f, "2022/06"),
+            BarValue(16f, "Jan"),
+            BarValue(12f, "Feb"),
+            BarValue(10f, "Mar"),
+            BarValue(14f, "Apr"),
+            BarValue(11f, "May"),
+            BarValue(13f, "Jun"),
         ),
         barColor = Color.Gray,
-        label = "Chart2"
+        label = "Data 2"
     )
     val barData3 = BarChartData(
         values = listOf(
-            BarValue(12f, "2022/01"),
-            BarValue(23f, "2022/02"),
-            BarValue(11f, "2022/03"),
-            BarValue(15f, "2022/04"),
-            BarValue(11f, "2022/05"),
+            BarValue(12f, "Jan"),
+            BarValue(23f, "Feb"),
+            BarValue(11f, "Mar"),
+            BarValue(15f, "Apr"),
+            BarValue(11f, "May"),
         ),
         barColor = Color.Green,
-        label = "Chart3"
+        label = "Data 3"
     )
     val barData4 = BarChartData(
         values = listOf(
-            BarValue(12f, "2022/01"),
-            BarValue(23f, "2022/02"),
-            BarValue(11f, "2022/03"),
-            BarValue(15f, "2022/04"),
-            BarValue(11f, "2022/05"),
+            BarValue(15f, "Jan"),
+            BarValue(25f, "Feb"),
+            BarValue(17f, "Mar"),
+            BarValue(14f, "Apr"),
+            BarValue(19f, "May"),
+            BarValue(20f, "Jun"),
         ),
         barColor = Color.Magenta,
-        label = "Chart4"
+        label = "Data 4"
     )
 
-    return listOf(barData1, barData2, barData3, barData4)
+    return listOf(barData1, barData2, barData3)
 }
