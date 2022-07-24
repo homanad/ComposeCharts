@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import com.homalab.android.compose.charts.components.*
 import com.homalab.android.compose.charts.entities.BarEntity
+import kotlin.math.ceil
 
 @Composable
 fun BarChart2(
@@ -38,7 +39,11 @@ fun BarChart2(
         horizontalLineOptions.horizontalLineSpacing * (verticalAxisValues.size - 1)
     val horizontalAxisLabelHeight = contentPadding + horizontalAxisOptions.axisLabelFontSize.toDp()
 
-    val chartHeight = visibleChartHeight + horizontalAxisLabelHeight
+    val totalChartLabelHeight =
+        horizontalAxisLabelHeight * ceil(chartData.size.toFloat() / MaxChartLabelInOneLine)
+
+    val chartHeight = visibleChartHeight + horizontalAxisLabelHeight + totalChartLabelHeight
+    val chartLabelBaseY = (visibleChartHeight + horizontalAxisLabelHeight).toPx()
 
     val leftAreaWidth = calculateTextWidth(
         verticalAxisLabelTransform(verticalAxisValues.last()),
@@ -111,9 +116,52 @@ fun BarChart2(
 
         val rectFs = mutableListOf<BarEntity>()
 
+        val labelRectPaint = Paint().apply { isAntiAlias = true }
+        val horizontalValuesPaint = Paint().apply {
+            textSize = horizontalAxisOptions.axisLabelFontSize.toPx()
+            color = horizontalAxisOptions.axisLabelColor.toArgb()
+            textAlign = Paint.Align.CENTER
+            isAntiAlias = true
+        }
         val valueLabels = mutableSetOf<String>().apply {
-            chartData.forEach {
-                addAll(it.values.map { value -> value.valueLabel })
+            chartData.forEachIndexed { index, barChartData ->
+                addAll(barChartData.values.map { value -> value.valueLabel })
+
+                val width =
+                    if (chartData.size >= MaxChartLabelInOneLine) horizontalAxisLength / MaxChartLabelInOneLine
+                    else horizontalAxisLength / chartData.size
+                var x = width * (index % MaxChartLabelInOneLine)
+                x += leftAreaWidth
+
+                val y = chartLabelBaseY + horizontalAxisLabelHeight.toPx() *
+                        ceil((index + 1).toFloat() / MaxChartLabelInOneLine)
+
+                labelRectPaint.color = barChartData.barColor.toArgb()
+                val startRect = x + contentPaddingPx
+                val endRect = startRect + width / 4
+
+                val topLeft = Offset(startRect, y - horizontalAxisOptions.axisLabelFontSize.toPx())
+                drawRect(
+                    color = barChartData.barColor,
+                    topLeft = topLeft,
+                    size = Offset(
+                        endRect,
+                        y + horizontalAxisOptions.axisLabelFontSize.toPx() / 2
+                    ).toSize(topLeft)
+                )
+
+                val textWidth =
+                    calculateTextWidth(
+                        barChartData.label,
+                        horizontalAxisOptions.axisLabelFontSize.toPx()
+                    )
+
+                drawText(
+                    barChartData.label,
+                    (endRect + contentPaddingPx + textWidth / 2),
+                    y,
+                    horizontalValuesPaint
+                )
             }
         }
 
@@ -160,7 +208,6 @@ fun BarChart2(
                     topLeft = rect.topLeft,
                     size = rect.bottomRight.toSize(rect.topLeft)
                 )
-
             }
 
             drawText(
