@@ -19,22 +19,34 @@ val HorizontalLineSpacing = 30.dp
 const val DefaultCirclePointRatio = 1.5f
 const val DefaultUpscaleRatioStep = 0.5f
 const val MaxChartLabelInOneLine = 3
-const val DEFAULT_DURATION = 150
+const val DEFAULT_DURATION = 600
+const val DEFAULT_DELAY_DURATION = 200
 const val DefaultBarWidthRatio = 0.8f
 
 object ChartDefaults {
 
     fun defaultAnimationOptions() =
-        AnimationOptions(isEnabled = false, durationMillis = DEFAULT_DURATION)
+        AnimationOptions(
+            isEnabled = false,
+            durationMillis = DEFAULT_DURATION,
+            delayMillis = DEFAULT_DELAY_DURATION,
+            componentDurationMillis = DEFAULT_DURATION
+        )
 
     @Immutable
     class AnimationOptions(
         val isEnabled: Boolean,
         val durationMillis: Int,
+        val delayMillis: Int,
+        val componentDurationMillis: Int
     ) {
         @Stable
-        fun copy(isEnabled: Boolean = this.isEnabled, durationMillis: Int = this.durationMillis) =
-            AnimationOptions(isEnabled, durationMillis)
+        fun copy(
+            isEnabled: Boolean = this.isEnabled,
+            durationMillis: Int = this.durationMillis,
+            delayMillis: Int = this.delayMillis,
+            componentDurationMillis: Int = this.componentDurationMillis
+        ) = AnimationOptions(isEnabled, durationMillis, delayMillis, componentDurationMillis)
     }
 
     fun defaultAxisOptions() = AxisOptions(

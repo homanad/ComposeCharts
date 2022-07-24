@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import com.homalab.android.compose.charts.components.*
 import com.homalab.android.compose.charts.entities.BarEntity
+import kotlinx.coroutines.delay
 import kotlin.math.ceil
 
 @Composable
@@ -59,7 +60,6 @@ fun BarChart(
         mutableStateOf(listOf<BarEntity>())
     }
 
-
     val chartAnimatable = remember {
         if (animationOptions.isEnabled) Animatable(0f) else Animatable(1f)
     }
@@ -67,7 +67,11 @@ fun BarChart(
     LaunchedEffect(key1 = chartAnimatable, block = {
         if (!animationOptions.isEnabled) return@LaunchedEffect
 
-        chartAnimatable.animateTo(targetValue = 1f, animationSpec = tween(durationMillis = 600))
+        delay(animationOptions.delayMillis.toLong())
+        chartAnimatable.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = animationOptions.componentDurationMillis)
+        )
     })
 
     Canvas(modifier = modifier.height(chartHeight)) {
@@ -243,7 +247,7 @@ fun BarChart(
         AnimatedBar(
             modifier = modifier.height(chartHeight),
             durationMillis = animationOptions.durationMillis,
-            delayMillis = index * animationOptions.durationMillis.toLong(),
+            delayMillis = index * animationOptions.durationMillis.toLong() + animationOptions.delayMillis,
             barEntity = bar
         )
     }

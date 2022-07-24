@@ -17,6 +17,7 @@ import com.homalab.android.compose.charts.components.*
 import com.homalab.android.compose.charts.entities.CircleEntity
 import com.homalab.android.compose.charts.entities.LineEntity
 import com.homalab.android.compose.charts.entities.TextEntity
+import kotlinx.coroutines.delay
 import kotlin.math.ceil
 
 @Composable
@@ -67,9 +68,10 @@ fun LineChart(
     LaunchedEffect(key1 = chartAnimatable, block = {
         if (!animationOptions.isEnabled) return@LaunchedEffect
 
+        delay(animationOptions.delayMillis.toLong())
         chartAnimatable.animateTo(
             targetValue = 1f,
-            animationSpec = tween(durationMillis = 600)
+            animationSpec = tween(durationMillis = animationOptions.componentDurationMillis)
         )
     })
 
@@ -132,7 +134,7 @@ fun LineChart(
             if (horizontalLineOptions.showHorizontalLines && index != 0)
                 drawLine(
                     start = Offset(leftAreaWidth, y),
-                    end = Offset(size.width * chartAnimatable.value, y),
+                    end = Offset(leftAreaWidth + horizontalAxisWidth * chartAnimatable.value, y),
                     color = horizontalLineOptions.horizontalLineColor,
                     strokeWidth = horizontalLineOptions.horizontalLineThickness.toPx(),
                     pathEffect = if (horizontalLineOptions.horizontalLineStyle == HorizontalLineStyle.DASH)
@@ -261,7 +263,7 @@ fun LineChart(
         AnimatedLine(
             modifier = modifier.height(chartHeight),
             durationMillis = animationOptions.durationMillis,
-            delayMillis = (index + 1) * animationOptions.durationMillis,
+            delayMillis = (index + 1) * animationOptions.durationMillis + animationOptions.delayMillis,
             lineEntity = line
         )
     }
@@ -270,7 +272,7 @@ fun LineChart(
         AnimatedCircle(
             modifier = modifier.height(chartHeight),
             durationMillis = animationOptions.durationMillis,
-            delayMillis = index * animationOptions.durationMillis,
+            delayMillis = index * animationOptions.durationMillis + animationOptions.delayMillis,
             strokeWidth = lineWidth,
             circleEntity = circleEntity
         )
